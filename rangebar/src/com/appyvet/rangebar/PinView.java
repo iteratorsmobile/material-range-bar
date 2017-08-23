@@ -43,6 +43,7 @@ class PinView extends View {
     // Sets the default values for radius, normal, pressed if circle is to be
     // drawn but no value is given.
     private static final float DEFAULT_THUMB_RADIUS_DP = 14;
+    private static final String TAG = PinView.class.getSimpleName();
 
     // Member Variables ////////////////////////////////////////////////////////
 
@@ -96,6 +97,7 @@ class PinView extends View {
     private boolean mPinsAreTemporary;
 
     private boolean mHasBeenPressed = false;
+    private int mOffset;
 
     // Constructors ////////////////////////////////////////////////////////////
 
@@ -127,10 +129,11 @@ class PinView extends View {
      * @param pinsAreTemporary    whether to show the pin initially or just the circle
      */
     public void init(Context ctx, float y, float pinRadiusDP, int pinColor, int textColor,
-                     float circleRadius, int circleColor, int circleBoundaryColor, float circleBoundarySize, float minFont, float maxFont, boolean pinsAreTemporary) {
+                     float circleRadius, int circleColor, int circleBoundaryColor, float circleBoundarySize, float minFont, float maxFont, boolean pinsAreTemporary, int offset) {
 
         mRes = ctx.getResources();
         mPin = ContextCompat.getDrawable(ctx, R.drawable.roundrect);
+        mOffset = offset;
 
         mDensity = getResources().getDisplayMetrics().density;
         mMinPinFont = minFont / mDensity;
@@ -277,16 +280,28 @@ class PinView extends View {
         if (this.formatter != null) {
             text = formatter.format(text);
         }
-
-        int offset = -50;
         Rect bounds = new Rect();
         mTextPaint.getTextBounds(text, 0, text.length(), bounds);
-        int tooltipWidth = (int) (bounds.width() + 2 * mTextYPadding);
+        int tooltipWidth = (int) (bounds.width() + 4 * mTextYPadding);
+        int top = (int) (mY - (mPinRadiusPx * 2) - (int) mPinPadding - mOffset);
+        int bottom = (int) mY - (int) mPinPadding - mOffset;
+        int left;
+        int right;
+        int textX;
 
-        int left = mX - tooltipWidth / 2 >= 0 ? (int) (mX - tooltipWidth / 2) : 0;
-        int top = (int) (mY - (mPinRadiusPx * 2) - (int) mPinPadding - offset);
-        int right = mX - tooltipWidth / 2 >= 0 ? (int) (mX + tooltipWidth / 2) : tooltipWidth;
-        int bottom = (int) mY - (int) mPinPadding - offset;
+        if (mX + tooltipWidth / 2 >= canvas.getWidth()) {
+            left = canvas.getWidth() - tooltipWidth;
+            right = canvas.getWidth();
+            textX = canvas.getWidth() - tooltipWidth / 2;
+        } else if (mX - tooltipWidth / 2 >= 0) {
+            left = (int) (mX - tooltipWidth / 2);
+            right = (int) (mX + tooltipWidth / 2);
+            textX = (int) mX;
+        } else {
+            left = 0;
+            right = tooltipWidth;
+            textX = tooltipWidth / 2;
+        }
 
         mBounds.set(left, top, right, bottom);
         mPin.setBounds(mBounds);
@@ -296,11 +311,10 @@ class PinView extends View {
             canvas.drawCircle(mX, mY, mCircleRadiusPx, mCircleBoundaryPaint);
 
         // draw thumb
-        canvas.drawCircle(mX, mY + offset, mCircleRadiusPx, mCirclePaint);
+        canvas.drawCircle(mX, mY + mOffset, mCircleRadiusPx, mCirclePaint);
 
         // draw tooltip top triangle
         canvas.drawPath(getTrianglePath(20, new Point((int) mX, top - 10)), mCirclePaint);
-
 
         //Draw tooltip
         calibrateTextSize(mTextPaint, text, mBounds.width());
@@ -309,11 +323,11 @@ class PinView extends View {
         mPin.setColorFilter(mPinFilter);
         mPin.draw(canvas);
         canvas.drawText(text,
-                mX - tooltipWidth / 2 >= 0 ? mX : tooltipWidth / 2,
-                mY - mPinRadiusPx - mPinPadding + mTextYPadding - offset,
+                textX, mY - mPinRadiusPx - mPinPadding + mTextYPadding - mOffset,
                 mTextPaint);
 
         super.draw(canvas);
+
     }
 
     // Private Methods /////////////////////////////////////////////////////////////////

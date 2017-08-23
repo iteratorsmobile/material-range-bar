@@ -25,7 +25,6 @@ package com.appyvet.rangebar;
  * governing permissions and limitations under the License.
  */
 
-import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -208,6 +207,7 @@ public class RangeBar extends View {
             }
         }
     };
+    private int offset = (int) (-getResources().getDisplayMetrics().density * 28);
 
     // Constructors ////////////////////////////////////////////////////////////
 
@@ -364,19 +364,19 @@ public class RangeBar extends View {
             mLeftThumb = new PinView(ctx);
             mLeftThumb.setFormatter(mFormatter);
             mLeftThumb.init(ctx, yPos, expandedPinRadius, mPinColor, mTextColor, mCircleSize,
-                    mCircleColor,mCircleBoundaryColor, mCircleBoundarySize, mMinPinFont, mMaxPinFont, mArePinsTemporary);
+                    mCircleColor, mCircleBoundaryColor, mCircleBoundarySize, mMinPinFont, mMaxPinFont, mArePinsTemporary, offset);
         }
         mRightThumb = new PinView(ctx);
         mRightThumb.setFormatter(mFormatter);
         mRightThumb.init(ctx, yPos, expandedPinRadius, mPinColor, mTextColor, mCircleSize,
-                mCircleColor,mCircleBoundaryColor, mCircleBoundarySize, mMinPinFont, mMaxPinFont, mArePinsTemporary);
+                mCircleColor, mCircleBoundaryColor, mCircleBoundarySize, mMinPinFont, mMaxPinFont, mArePinsTemporary, offset);
 
         // Create the underlying bar.
         final float marginLeft = Math.max(mExpandedPinRadius, mCircleSize);
 
         final float barLength = w - (2 * marginLeft);
         mBar = new Bar(ctx, marginLeft, yPos, barLength, mTickCount, mTickHeightDP, mTickWidthDP, mTickColor,
-                mBarWeight, mBarColor);
+                mBarWeight, mBarColor, offset);
 
         // Initialize thumbs to the desired indices
         if (mIsRangeBar) {
@@ -401,7 +401,7 @@ public class RangeBar extends View {
 
         // Create the line connecting the two thumbs.
         mConnectingLine = new ConnectingLine(ctx, yPos, mConnectingLineWeight,
-                mConnectingLineColor);
+                mConnectingLineColor, offset);
     }
 
     @Override
@@ -680,6 +680,10 @@ public class RangeBar extends View {
         createBar();
     }
 
+    public int getBarColor() {
+        return mBarColor;
+    }
+
     /**
      * Set the color of the pins.
      *
@@ -688,6 +692,10 @@ public class RangeBar extends View {
     public void setPinColor(int pinColor) {
         mPinColor = pinColor;
         createPins();
+    }
+
+    public int getPinColor() {
+        return mPinColor;
     }
 
     /**
@@ -735,6 +743,10 @@ public class RangeBar extends View {
         createBar();
     }
 
+    public int getTickColor() {
+        return mTickColor;
+    }
+
     /**
      * Set the color of the selector.
      *
@@ -743,6 +755,10 @@ public class RangeBar extends View {
     public void setSelectorColor(int selectorColor) {
         mCircleColor = selectorColor;
         createPins();
+    }
+
+    public int getSelectorColor() {
+        return mCircleColor;
     }
 
     /**
@@ -787,6 +803,10 @@ public class RangeBar extends View {
 
         mConnectingLineColor = connectingLineColor;
         createConnectingLine();
+    }
+
+    public int getConnectingLineColor() {
+        return mConnectingLineColor;
     }
 
     /**
@@ -1168,7 +1188,7 @@ public class RangeBar extends View {
                 mTickWidthDP,
                 mTickColor,
                 mBarWeight,
-                mBarColor);
+                mBarColor, offset);
         invalidate();
     }
 
@@ -1180,7 +1200,7 @@ public class RangeBar extends View {
         mConnectingLine = new ConnectingLine(getContext(),
                 getYPos(),
                 mConnectingLineWeight,
-                mConnectingLineColor);
+                mConnectingLineColor, offset);
         invalidate();
     }
 
@@ -1193,13 +1213,13 @@ public class RangeBar extends View {
 
         if (mIsRangeBar) {
             mLeftThumb = new PinView(ctx);
-            mLeftThumb.init(ctx, yPos, 0, mPinColor, mTextColor, mCircleSize, mCircleColor,mCircleBoundaryColor, mCircleBoundarySize,
-                    mMinPinFont, mMaxPinFont, false);
+            mLeftThumb.init(ctx, yPos, 0, mPinColor, mTextColor, mCircleSize, mCircleColor, mCircleBoundaryColor, mCircleBoundarySize,
+                    mMinPinFont, mMaxPinFont, false, offset);
         }
         mRightThumb = new PinView(ctx);
         mRightThumb
-                .init(ctx, yPos, 0, mPinColor, mTextColor, mCircleSize, mCircleColor,mCircleBoundaryColor, mCircleBoundarySize
-                        , mMinPinFont, mMaxPinFont, false);
+                .init(ctx, yPos, 0, mPinColor, mTextColor, mCircleSize, mCircleColor, mCircleBoundaryColor, mCircleBoundarySize
+                        , mMinPinFont, mMaxPinFont, false, offset);
 
         float marginLeft = getMarginLeft();
         float barLength = getBarLength();
@@ -1457,7 +1477,7 @@ public class RangeBar extends View {
 //            });
 //            animator.start();
 //        } else {
-            invalidate();
+        invalidate();
 //        }
 
         thumb.release();
@@ -1515,7 +1535,7 @@ public class RangeBar extends View {
     public interface OnRangeBarChangeListener {
 
         public void onRangeChangeListener(RangeBar rangeBar, int leftPinIndex,
-                int rightPinIndex, String leftPinValue, String rightPinValue);
+                                          int rightPinIndex, String leftPinValue, String rightPinValue);
     }
 
     public interface PinTextFormatter {

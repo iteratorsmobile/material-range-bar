@@ -29,6 +29,7 @@ public class ConnectingLine {
     private final Paint mPaint;
 
     private final float mY;
+    private int mOffset;
 
     // Constructor /////////////////////////////////////////////////////////////
 
@@ -41,7 +42,7 @@ public class ConnectingLine {
      * @param connectingLineColor  the color of the line
      */
     public ConnectingLine(Context ctx, float y, float connectingLineWeight,
-                          int connectingLineColor) {
+                          int connectingLineColor, int offset) {
 
         final Resources res = ctx.getResources();
 
@@ -55,7 +56,7 @@ public class ConnectingLine {
         mPaint.setStrokeWidth(connectingLineWeight1);
         mPaint.setStrokeCap(Paint.Cap.ROUND);
         mPaint.setAntiAlias(true);
-
+        this.mOffset = offset;
         mY = y;
     }
 
@@ -80,7 +81,6 @@ public class ConnectingLine {
      * @param leftMargin the left margin
      */
     public void draw(Canvas canvas, float leftMargin, PinView rightThumb) {
-        int offset = 50;
-        canvas.drawLine(leftMargin, mY - offset, rightThumb.getX(), mY - offset, mPaint);
+        canvas.drawLine(leftMargin, mY + mOffset, rightThumb.getX(), mY + mOffset, mPaint);
     }
 }

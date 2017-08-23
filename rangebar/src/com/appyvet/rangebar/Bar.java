@@ -16,7 +16,6 @@ package com.appyvet.rangebar;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.util.Log;
 import android.util.TypedValue;
 
 /**
@@ -44,6 +43,7 @@ public class Bar {
 
     private final float mTickHeight;
     private final float mTickWidth;
+    private float mOffset;
 
     // Constructor /////////////////////////////////////////////////////////////
 
@@ -70,8 +70,10 @@ public class Bar {
                float tickWidthDP,
                int tickColor,
                float barWeight,
-               int barColor) {
+               int barColor,
+               int offset) {
 
+        this.mOffset = offset;
         mLeftX = x;
         mRightX = x + length;
         mY = y;
@@ -107,7 +109,7 @@ public class Bar {
      */
     public void draw(Canvas canvas) {
 
-        canvas.drawLine(mLeftX, mY - 50, mRightX, mY - 50, mBarPaint);
+        canvas.drawLine(mLeftX, mY + mOffset, mRightX, mY + mOffset, mBarPaint);
     }
 
     /**
@@ -175,14 +177,13 @@ public class Bar {
      *               View#onDraw()}
      */
     public void drawTicks(Canvas canvas) {
-        int offset = 50;
         // Loop through and draw each tick (except final tick).
         for (int i = 0; i < mNumSegments; i++) {
             final float x = i * mTickDistance + mLeftX;
-            canvas.drawRect(x - mTickWidth / 2, mY + mTickHeight / 2 - offset, x + mTickWidth / 2, mY - mTickHeight / 2 - offset, mTickPaint);
+            canvas.drawRect(x - mTickWidth / 2, mY + mTickHeight / 2 + mOffset, x + mTickWidth / 2, mY - mTickHeight / 2 + mOffset, mTickPaint);
         }
         // Draw final tick. We draw the final tick outside the loop to avoid any
         // rounding discrepancies.
-        canvas.drawRect(mRightX - mTickWidth / 2, mY + mTickHeight / 2 - offset, mRightX + mTickWidth / 2, mY - mTickHeight / 2 - offset, mTickPaint);
+        canvas.drawRect(mRightX - mTickWidth / 2, mY + mTickHeight / 2 + mOffset, mRightX + mTickWidth / 2, mY - mTickHeight / 2 + mOffset, mTickPaint);
     }
 }
