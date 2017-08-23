@@ -16,6 +16,7 @@ package com.appyvet.rangebar;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.util.Log;
 import android.util.TypedValue;
 
 /**
@@ -106,7 +107,7 @@ public class Bar {
      */
     public void draw(Canvas canvas) {
 
-        canvas.drawLine(mLeftX, mY, mRightX, mY, mBarPaint);
+        canvas.drawLine(mLeftX, mY - 50, mRightX, mY - 50, mBarPaint);
     }
 
     /**
@@ -174,14 +175,14 @@ public class Bar {
      *               View#onDraw()}
      */
     public void drawTicks(Canvas canvas) {
-
+        int offset = 50;
         // Loop through and draw each tick (except final tick).
         for (int i = 0; i < mNumSegments; i++) {
             final float x = i * mTickDistance + mLeftX;
-            canvas.drawRect(x + mTickHeight / 2, mY, x + mTickWidth, x - mTickHeight / 2, mTickPaint);
+            canvas.drawRect(x - mTickWidth / 2, mY + mTickHeight / 2 - offset, x + mTickWidth / 2, mY - mTickHeight / 2 - offset, mTickPaint);
         }
         // Draw final tick. We draw the final tick outside the loop to avoid any
         // rounding discrepancies.
-        canvas.drawCircle(mRightX, mY, mTickHeight, mTickPaint);
+        canvas.drawRect(mRightX - mTickWidth / 2, mY + mTickHeight / 2 - offset, mRightX + mTickWidth / 2, mY - mTickHeight / 2 - offset, mTickPaint);
     }
 }

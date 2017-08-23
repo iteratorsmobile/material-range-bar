@@ -41,7 +41,7 @@ public class ConnectingLine {
      * @param connectingLineColor  the color of the line
      */
     public ConnectingLine(Context ctx, float y, float connectingLineWeight,
-            int connectingLineColor) {
+                          int connectingLineColor) {
 
         final Resources res = ctx.getResources();
 
@@ -80,6 +80,7 @@ public class ConnectingLine {
      * @param leftMargin the left margin
      */
     public void draw(Canvas canvas, float leftMargin, PinView rightThumb) {
-        canvas.drawLine(leftMargin, mY, rightThumb.getX(), mY, mPaint);
+        int offset = 50;
+        canvas.drawLine(leftMargin, mY - offset, rightThumb.getX(), mY - offset, mPaint);
     }
 }

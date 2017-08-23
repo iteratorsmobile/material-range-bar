@@ -1413,19 +1413,19 @@ public class RangeBar extends View {
         if (mFirstSetTickCount) {
             mFirstSetTickCount = false;
         }
-        if (mArePinsTemporary) {
-            ValueAnimator animator = ValueAnimator.ofFloat(0, mExpandedPinRadius);
-            animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-
-                @Override
-                public void onAnimationUpdate(ValueAnimator animation) {
-                    mThumbRadiusDP = (Float) (animation.getAnimatedValue());
-                    thumb.setSize(mThumbRadiusDP, mPinPadding * animation.getAnimatedFraction());
-                    invalidate();
-                }
-            });
-            animator.start();
-        }
+//        if (mArePinsTemporary) {
+//            ValueAnimator animator = ValueAnimator.ofFloat(0, mExpandedPinRadius);
+//            animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+//
+//                @Override
+//                public void onAnimationUpdate(ValueAnimator animation) {
+//                    mThumbRadiusDP = (Float) (animation.getAnimatedValue());
+//                    thumb.setSize(mThumbRadiusDP, mPinPadding * animation.getAnimatedFraction());
+//                    invalidate();
+//                }
+//            });
+//            animator.start();
+//        }
 
         thumb.press();
     }
@@ -1443,22 +1443,22 @@ public class RangeBar extends View {
         int tickIndex = mBar.getNearestTickIndex(thumb);
         thumb.setXValue(getPinValue(tickIndex));
 
-        if (mArePinsTemporary) {
-            ValueAnimator animator = ValueAnimator.ofFloat(mExpandedPinRadius, 0);
-            animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-
-                @Override
-                public void onAnimationUpdate(ValueAnimator animation) {
-                    mThumbRadiusDP = (Float) (animation.getAnimatedValue());
-                    thumb.setSize(mThumbRadiusDP,
-                            mPinPadding - (mPinPadding * animation.getAnimatedFraction()));
-                    invalidate();
-                }
-            });
-            animator.start();
-        } else {
+//        if (mArePinsTemporary) {
+//            ValueAnimator animator = ValueAnimator.ofFloat(mExpandedPinRadius, 0);
+//            animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+//
+//                @Override
+//                public void onAnimationUpdate(ValueAnimator animation) {
+//                    mThumbRadiusDP = (Float) (animation.getAnimatedValue());
+//                    thumb.setSize(mThumbRadiusDP,
+//                            mPinPadding - (mPinPadding * animation.getAnimatedFraction()));
+//                    invalidate();
+//                }
+//            });
+//            animator.start();
+//        } else {
             invalidate();
-        }
+//        }
 
         thumb.release();
     }

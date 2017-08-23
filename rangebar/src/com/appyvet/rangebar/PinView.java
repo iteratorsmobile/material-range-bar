@@ -19,6 +19,8 @@ import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.LightingColorFilter;
 import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
@@ -128,7 +130,7 @@ class PinView extends View {
                      float circleRadius, int circleColor, int circleBoundaryColor, float circleBoundarySize, float minFont, float maxFont, boolean pinsAreTemporary) {
 
         mRes = ctx.getResources();
-        mPin = ContextCompat.getDrawable(ctx, R.drawable.rotate);
+        mPin = ContextCompat.getDrawable(ctx, R.drawable.roundrect);
 
         mDensity = getResources().getDisplayMetrics().density;
         mMinPinFont = minFont / mDensity;
@@ -139,7 +141,7 @@ class PinView extends View {
                 15, mRes.getDisplayMetrics());
         mCircleRadiusPx = circleRadius;
         mTextYPadding = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-                3.5f, mRes.getDisplayMetrics());
+                4f, mRes.getDisplayMetrics());
         // If one of the attributes are set, but the others aren't, set the
         // attributes to default
         if (pinRadiusDP == -1) {
@@ -271,49 +273,82 @@ class PinView extends View {
     //Draw the circle regardless of pressed state. If pin size is >0 then also draw the pin and text
     @Override
     public void draw(Canvas canvas) {
+        String text = mValue;
+        if (this.formatter != null) {
+            text = formatter.format(text);
+        }
+
+        int offset = -50;
+        Rect bounds = new Rect();
+        mTextPaint.getTextBounds(text, 0, text.length(), bounds);
+        int tooltipWidth = (int) (bounds.width() + 2 * mTextYPadding);
+
+        int left = mX - tooltipWidth / 2 >= 0 ? (int) (mX - tooltipWidth / 2) : 0;
+        int top = (int) (mY - (mPinRadiusPx * 2) - (int) mPinPadding - offset);
+        int right = mX - tooltipWidth / 2 >= 0 ? (int) (mX + tooltipWidth / 2) : tooltipWidth;
+        int bottom = (int) mY - (int) mPinPadding - offset;
+
+        mBounds.set(left, top, right, bottom);
+        mPin.setBounds(mBounds);
+
         //Draw the circle boundary only if mCircleBoundaryPaint was initialized
         if (mCircleBoundaryPaint != null)
             canvas.drawCircle(mX, mY, mCircleRadiusPx, mCircleBoundaryPaint);
 
-        canvas.drawCircle(mX, mY, mCircleRadiusPx, mCirclePaint);
-        //Draw pin if pressed
-        if (mPinRadiusPx > 0 && (mHasBeenPressed || !mPinsAreTemporary)) {
-            mBounds.set((int) mX - mPinRadiusPx,
-                    (int) mY - (mPinRadiusPx * 2) - (int) mPinPadding,
-                    (int) mX + mPinRadiusPx, (int) mY - (int) mPinPadding);
-            mPin.setBounds(mBounds);
-            String text = mValue;
+        // draw thumb
+        canvas.drawCircle(mX, mY + offset, mCircleRadiusPx, mCirclePaint);
 
-            if (this.formatter != null) {
-                text = formatter.format(text);
-            }
+        // draw tooltip top triangle
+        canvas.drawPath(getTrianglePath(20, new Point((int) mX, top - 10)), mCirclePaint);
 
-            calibrateTextSize(mTextPaint, text, mBounds.width());
-            mTextPaint.getTextBounds(text, 0, text.length(), mBounds);
-            mTextPaint.setTextAlign(Paint.Align.CENTER);
-            mPin.setColorFilter(mPinFilter);
-            mPin.draw(canvas);
-            canvas.drawText(text,
-                    mX, mY - mPinRadiusPx - mPinPadding + mTextYPadding,
-                    mTextPaint);
-        }
+
+        //Draw tooltip
+        calibrateTextSize(mTextPaint, text, mBounds.width());
+        mTextPaint.getTextBounds(text, 0, text.length(), mBounds);
+        mTextPaint.setTextAlign(Paint.Align.CENTER);
+        mPin.setColorFilter(mPinFilter);
+        mPin.draw(canvas);
+        canvas.drawText(text,
+                mX - tooltipWidth / 2 >= 0 ? mX : tooltipWidth / 2,
+                mY - mPinRadiusPx - mPinPadding + mTextYPadding - offset,
+                mTextPaint);
+
         super.draw(canvas);
     }
 
     // Private Methods /////////////////////////////////////////////////////////////////
 
+    private Path getTrianglePath(int arrowSize, Point top) {
+        int leftPointX = top.x + arrowSize / 2;
+        int leftPointY = top.y + arrowSize / 2;
+        int rightPointX = top.x - arrowSize / 2;
+        int rightPointY = top.y + arrowSize / 2;
+
+        Point left = new Point(leftPointX, leftPointY);
+        Point right = new Point(rightPointX, rightPointY);
+
+        Path path = new Path();
+        path.setFillType(Path.FillType.EVEN_ODD);
+        path.moveTo(top.x, top.y);
+        path.lineTo(right.x, right.y);
+        path.lineTo(left.x, left.y);
+        path.close();
+
+        return path;
+    }
+
     //Set text size based on available pin width.
     private void calibrateTextSize(Paint paint, String text, float boxWidth) {
-        paint.setTextSize(10);
+        paint.setTextSize(15 * mDensity);
 
         float textSize = paint.measureText(text);
         float estimatedFontSize = boxWidth * 8 / textSize / mDensity;
 
-        if (estimatedFontSize < mMinPinFont) {
-            estimatedFontSize = mMinPinFont;
-        } else if (estimatedFontSize > mMaxPinFont) {
-            estimatedFontSize = mMaxPinFont;
-        }
-        paint.setTextSize(estimatedFontSize * mDensity);
+//        if (estimatedFontSize < mMinPinFont) {
+//            estimatedFontSize = mMinPinFont;
+//        } else if (estimatedFontSize > mMaxPinFont) {
+//            estimatedFontSize = mMaxPinFont;
+//        }
+//        paint.setTextSize(estimatedFontSize * mDensity);
     }
 }
