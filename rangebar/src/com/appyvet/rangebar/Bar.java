@@ -42,6 +42,7 @@ public class Bar {
     private float mTickDistance;
 
     private final float mTickHeight;
+    private final float mTickWidth;
 
     // Constructor /////////////////////////////////////////////////////////////
 
@@ -60,14 +61,15 @@ public class Bar {
      * @param barColor     the color of the bar
      */
     public Bar(Context ctx,
-            float x,
-            float y,
-            float length,
-            int tickCount,
-            float tickHeightDP,
-            int tickColor,
-            float barWeight,
-            int barColor) {
+               float x,
+               float y,
+               float length,
+               int tickCount,
+               float tickHeightDP,
+               float tickWidthDP,
+               int tickColor,
+               float barWeight,
+               int barColor) {
 
         mLeftX = x;
         mRightX = x + length;
@@ -77,6 +79,10 @@ public class Bar {
         mTickDistance = length / mNumSegments;
         mTickHeight = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
                 tickHeightDP,
+                ctx.getResources().getDisplayMetrics());
+
+        mTickWidth = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                tickWidthDP,
                 ctx.getResources().getDisplayMetrics());
 
         // Initialize the paint.
@@ -172,7 +178,7 @@ public class Bar {
         // Loop through and draw each tick (except final tick).
         for (int i = 0; i < mNumSegments; i++) {
             final float x = i * mTickDistance + mLeftX;
-            canvas.drawCircle(x, mY, mTickHeight, mTickPaint);
+            canvas.drawRect(x + mTickHeight / 2, mY, x + mTickWidth, x - mTickHeight / 2, mTickPaint);
         }
         // Draw final tick. We draw the final tick outside the loop to avoid any
         // rounding discrepancies.

@@ -5,6 +5,7 @@
         <attr name="tickEnd" format="float"/>
         <attr name="tickInterval" format="float"/>
         <attr name="tickHeight" format="dimension"/>
+        <attr name="tickWidth" format="dimension"/>
         <attr name="tickColor" format="color"/>
         <attr name="barWeight" format="dimension"/>
         <attr name="rangeBarColor" format="reference|color"/>
