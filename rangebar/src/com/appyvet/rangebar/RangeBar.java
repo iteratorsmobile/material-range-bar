@@ -86,7 +86,8 @@ public class RangeBar extends View {
     private static final int DEFAULT_TICK_COLOR = Color.BLACK;
 
     // Corresponds to material indigo 500.
-    private static final int DEFAULT_PIN_COLOR = 0xff3f51b5;
+ //   private static final int DEFAULT_PIN_COLOR = 0xff3f51b5;
+    private static final int DEFAULT_PIN_COLOR = Color.WHITE;
 
     private static final float DEFAULT_CONNECTING_LINE_WEIGHT_PX = 4;
 
@@ -207,7 +208,7 @@ public class RangeBar extends View {
             }
         }
     };
-    private int offset = (int) (-getResources().getDisplayMetrics().density * 28);
+    private int offset = (int) (getResources().getDisplayMetrics().density * 10);
 
     // Constructors ////////////////////////////////////////////////////////////
 

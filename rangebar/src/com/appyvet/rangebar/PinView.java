@@ -64,6 +64,7 @@ class PinView extends View {
     private Paint mTextPaint;
 
     private Drawable mPin;
+    private Drawable mPinInside;
 
     private String mValue;
 
@@ -85,6 +86,10 @@ class PinView extends View {
     private Paint mCirclePaint;
 
     private Paint mCircleBoundaryPaint;
+
+    private Paint mPinPaint;
+
+    private Paint mWhitePaint;
 
     private float mCircleRadiusPx;
 
@@ -133,6 +138,8 @@ class PinView extends View {
 
         mRes = ctx.getResources();
         mPin = ContextCompat.getDrawable(ctx, R.drawable.roundrect);
+        mPinInside = ContextCompat.getDrawable(ctx, R.drawable.roundrect_white);
+
         mOffset = offset;
 
         mDensity = getResources().getDisplayMetrics().density;
@@ -144,7 +151,7 @@ class PinView extends View {
                 15, mRes.getDisplayMetrics());
         mCircleRadiusPx = circleRadius;
         mTextYPadding = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-                4f, mRes.getDisplayMetrics());
+                6f, mRes.getDisplayMetrics());
         // If one of the attributes are set, but the others aren't, set the
         // attributes to default
         if (pinRadiusDP == -1) {
@@ -170,6 +177,17 @@ class PinView extends View {
         mCirclePaint.setColor(circleColor);
         mCirclePaint.setAntiAlias(true);
 
+        mPinPaint = new Paint();
+        mPinPaint.setColor(pinColor);
+        mPinPaint.setAntiAlias(true);
+        mPinPaint.setStyle(Paint.Style.STROKE);
+
+        mWhitePaint = new Paint();
+        mWhitePaint.setColor(ContextCompat.getColor(getContext(), R.color.white));
+        mWhitePaint.setAntiAlias(true);
+        mWhitePaint.setStyle(Paint.Style.STROKE);
+        mWhitePaint.setStrokeWidth(2f);
+
         if (circleBoundarySize != 0) {
             mCircleBoundaryPaint = new Paint();
             mCircleBoundaryPaint.setStyle(Paint.Style.STROKE);
@@ -178,7 +196,7 @@ class PinView extends View {
             mCircleBoundaryPaint.setAntiAlias(true);
         }
         //Color filter for the selection pin
-        mPinFilter = new LightingColorFilter(pinColor, pinColor);
+        mPinFilter = new LightingColorFilter(0, pinColor);
 
         // Sets the minimum touchable area, but allows it to expand based on
         // image size
@@ -305,6 +323,7 @@ class PinView extends View {
 
         mBounds.set(left, top, right, bottom);
         mPin.setBounds(mBounds);
+        mPinInside.setBounds(new Rect(left + 1, top + 1, right - 1, bottom - 1));
 
         //Draw the circle boundary only if mCircleBoundaryPaint was initialized
         if (mCircleBoundaryPaint != null)
@@ -313,8 +332,7 @@ class PinView extends View {
         // draw thumb
         canvas.drawCircle(mX, mY + mOffset, mCircleRadiusPx, mCirclePaint);
 
-        // draw tooltip top triangle
-        canvas.drawPath(getTrianglePath(20, new Point((int) mX, top - 10)), mCirclePaint);
+
 
         //Draw tooltip
         calibrateTextSize(mTextPaint, text, mBounds.width());
@@ -322,6 +340,14 @@ class PinView extends View {
         mTextPaint.setTextAlign(Paint.Align.CENTER);
         mPin.setColorFilter(mPinFilter);
         mPin.draw(canvas);
+        mPinInside.draw(canvas);
+
+        canvas.drawPath(getTriangleBasePath(20, new Point((int) mX, bottom + 10)), mWhitePaint);
+
+        // draw tooltip triangle
+        canvas.drawPath(getTriangleArmsPath(20, new Point((int) mX, bottom + 10)), mPinPaint);
+
+
         canvas.drawText(text,
                 textX, mY - mPinRadiusPx - mPinPadding + mTextYPadding - mOffset,
                 mTextPaint);
@@ -332,11 +358,11 @@ class PinView extends View {
 
     // Private Methods /////////////////////////////////////////////////////////////////
 
-    private Path getTrianglePath(int arrowSize, Point top) {
+    private Path getTriangleArmsPath(int arrowSize, Point top) {
         int leftPointX = top.x + arrowSize / 2;
-        int leftPointY = top.y + arrowSize / 2;
+        int leftPointY = top.y - arrowSize / 2;
         int rightPointX = top.x - arrowSize / 2;
-        int rightPointY = top.y + arrowSize / 2;
+        int rightPointY = top.y - arrowSize / 2;
 
         Point left = new Point(leftPointX, leftPointY);
         Point right = new Point(rightPointX, rightPointY);
@@ -345,11 +371,28 @@ class PinView extends View {
         path.setFillType(Path.FillType.EVEN_ODD);
         path.moveTo(top.x, top.y);
         path.lineTo(right.x, right.y);
+        path.moveTo(top.x, top.y);
         path.lineTo(left.x, left.y);
-        path.close();
-
+        //   path.close();
         return path;
     }
+
+    private Path getTriangleBasePath(int arrowSize, Point top) {
+        int leftPointX = top.x + arrowSize / 2;
+        int leftPointY = top.y - arrowSize / 2;
+        int rightPointX = top.x - arrowSize / 2;
+        int rightPointY = top.y - arrowSize / 2;
+
+        Point left = new Point(leftPointX, leftPointY);
+        Point right = new Point(rightPointX, rightPointY);
+
+        Path path = new Path();
+        path.moveTo(right.x, right.y);
+        path.lineTo(left.x, left.y);
+        //   path.close();
+        return path;
+    }
+
 
     //Set text size based on available pin width.
     private void calibrateTextSize(Paint paint, String text, float boxWidth) {
